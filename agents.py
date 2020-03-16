@@ -20,13 +20,15 @@ debuglogger.setLevel('INFO')
 def reset_parameters_util(model):
     for m in model.modules():
         if isinstance(m, nn.Linear):
-            m.weight.data.set_(xavier_normal(m.weight.data))
+            with torch.no_grad():
+            	m.weight.set_(xavier_normal(m.weight.data))
             if m.bias is not None:
                 m.bias.data.zero_()
         elif isinstance(m, nn.GRUCell):
             for mm in m.parameters():
                 if mm.data.ndimension() == 2:
-                    mm.data.set_(xavier_normal(mm.data))
+                    with torch.no_grad():
+                        mm.set_(xavier_normal(mm.data))
                 elif mm.data.ndimension() == 1:  # Bias
                     mm.data.zero_()
 
@@ -371,7 +373,8 @@ class Agent(nn.Module):
     def reset_parameters(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                m.weight.data.set_(xavier_normal(m.weight.data))
+                with torch.no_grad():
+               	    m.weight.set_(xavier_normal(m.weight.data))
                 if m.bias is not None:
                     m.bias.data.zero_()
         self.image_processor.reset_parameters()

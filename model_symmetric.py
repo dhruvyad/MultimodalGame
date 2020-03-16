@@ -2145,7 +2145,7 @@ def calculate_loss_binary(binary_features, binary_probs, rewards, baseline_rewar
     weight = Variable(rewards) - \
         Variable(baseline_rewards.clone().detach().data)
     if rewards.size(0) > 1:  # Ensures weights are not larger than 1
-        weight = weight / np.maximum(1., torch.std(weight.data))
+        weight = weight / max(1., torch.std(weight.data).item())
     loss = torch.mean(-1 * weight * log_p_z)
 
     # Must do both sides of negent, otherwise is skewed towards 0.
@@ -2224,7 +2224,7 @@ def get_classification_loss_and_stats(predictions, targets):
     maxdist, argmax = dist.data.max(1)
     probs = F.softmax(predictions, dim=1)
     ent = (torch.log(probs + 1e-8) * probs).sum(1).mean()
-    debuglogger.debug(f'Mean entropy: {-ent.data[0]}')
+    debuglogger.debug(f'Mean entropy: {-ent.data.item()}')
     nll_loss = nn.NLLLoss()(dist, Variable(targets))
     logs = loglikelihood(Variable(dist.data),
                          Variable(targets.view(-1, 1)))
@@ -2998,20 +2998,20 @@ def run():
 
                 # Agent1
                 log_loss_agent1 = "Epoch: {} Step: {} Batch: {} Loss Agent1: {}".format(
-                    epoch, step, i_batch, loss_agent1.data[0])
+                    epoch, step, i_batch, loss_agent1.data.item())
                 flogger.Log(log_loss_agent1)
                 # Agent 1 breakdown
                 log_loss_agent1_detail = "Epoch: {} Step: {} Batch: {} Loss Agent1: NLL: {} (BC:{} / AC:{}), RL: {}, Baseline: {} ".format(
-                    epoch, step, i_batch, nll_loss_1.data[0], nll_loss_1_nc.data[0], nll_loss_1_com.data[0], loss_binary_1.data[0], loss_baseline_1.data[0])
+                    epoch, step, i_batch, nll_loss_1.data.item(), nll_loss_1_nc.data.item(), nll_loss_1_com.data.item(), loss_binary_1.data.item(), loss_baseline_1.data.item())
                 flogger.Log(log_loss_agent1_detail)
 
                 # Agent2
                 log_loss_agent2 = "Epoch: {} Step: {} Batch: {} Loss Agent2: {}".format(
-                    epoch, step, i_batch, loss_agent2.data[0])
+                    epoch, step, i_batch, loss_agent2.data.item())
                 flogger.Log(log_loss_agent2)
                 # Agent 2 breakdown
                 log_loss_agent2_detail = "Epoch: {} Step: {} Batch: {} Loss Agent2: NLL: {} (BC:{} / AC:{}), RL: {}, Baseline: {} ".format(
-                    epoch, step, i_batch, nll_loss_2.data[0], nll_loss_2_nc.data[0], nll_loss_2_com.data[0], loss_binary_2.data[0], loss_baseline_2.data[0])
+                    epoch, step, i_batch, nll_loss_2.data.item(), nll_loss_2_nc.data.item(), nll_loss_2_com.data.item(), loss_binary_2.data.item(), loss_baseline_2.data.item())
                 flogger.Log(log_loss_agent2_detail)
 
                 # Log predictions
@@ -3025,7 +3025,7 @@ def run():
                         log_ent_agent1_bin = "Entropy Agent1 Binary"
                         for i, ent in enumerate(ent_agent1_bin):
                             log_ent_agent1_bin += "\n{}. {}".format(
-                                i, -ent.data[0])
+                                i, -ent.data.item())
                         log_ent_agent1_bin += "\n"
                         flogger.Log(log_ent_agent1_bin)
 
@@ -3033,60 +3033,60 @@ def run():
                         log_ent_agent2_bin = "Entropy Agent2 Binary"
                         for i, ent in enumerate(ent_agent2_bin):
                             log_ent_agent2_bin += "\n{}. {}".format(
-                                i, -ent.data[0])
+                                i, -ent.data.item())
                         log_ent_agent2_bin += "\n"
                         flogger.Log(log_ent_agent2_bin)
 
                 if len(ent_agent1_y) > 0:
                     log_ent_agent1_y = "Entropy Agent1 Predictions\n"
                     log_ent_agent1_y += "No comms entropy {}\n Comms entropy\n".format(
-                        -ent_1_nc.data[0])
+                        -ent_1_nc.data.item())
                     for i, ent in enumerate(ent_agent1_y):
-                        log_ent_agent1_y += "\n{}. {}".format(i, -ent.data[0])
+                        log_ent_agent1_y += "\n{}. {}".format(i, -ent.data.item())
                     log_ent_agent1_y += "\n"
                     flogger.Log(log_ent_agent1_y)
 
                 if len(ent_agent2_y) > 0:
                     log_ent_agent2_y = "Entropy Agent2 Predictions\n"
                     log_ent_agent2_y += "No comms entropy {}\n Comms entropy\n".format(
-                        -ent_2_nc.data[0])
+                        -ent_2_nc.data.item())
                     for i, ent in enumerate(ent_agent2_y):
-                        log_ent_agent2_y += "\n{}. {}".format(i, -ent.data[0])
+                        log_ent_agent2_y += "\n{}. {}".format(i, -ent.data.item())
                     log_ent_agent2_y += "\n"
                     flogger.Log(log_ent_agent2_y)
 
                 # Agent 1
                 logger.log(key="Loss Agent 1 (Total)",
-                           val=loss_agent1.data[0], step=step)
+                           val=loss_agent1.data.item(), step=step)
                 logger.log(key="Loss Agent 1 (NLL)",
-                           val=nll_loss_1.data[0], step=step)
+                           val=nll_loss_1.data.item(), step=step)
                 logger.log(key="Loss Agent 1 (NLL NC)",
-                           val=nll_loss_1_nc.data[0], step=step)
+                           val=nll_loss_1_nc.data.item(), step=step)
                 logger.log(key="Loss Agent 1 (NLL COM)",
-                           val=nll_loss_1_com.data[0], step=step)
+                           val=nll_loss_1_com.data.item(), step=step)
                 if FLAGS.use_binary:
                     logger.log(key="Loss Agent 1 (RL)",
-                               val=loss_binary_1.data[0], step=step)
+                               val=loss_binary_1.data.item(), step=step)
                     logger.log(key="Loss Agent 1 (BAS)",
-                               val=loss_baseline_1.data[0], step=step)
+                               val=loss_baseline_1.data.item(), step=step)
                     if not FLAGS.fixed_exchange:
                         # TODO
                         pass
 
                 # Agent 2
                 logger.log(key="Loss Agent 2 (Total)",
-                           val=loss_agent2.data[0], step=step)
+                           val=loss_agent2.data.item(), step=step)
                 logger.log(key="Loss Agent 2 (NLL)",
-                           val=nll_loss_2.data[0], step=step)
+                           val=nll_loss_2.data.item(), step=step)
                 logger.log(key="Loss Agent 2 (NLL NC)",
-                           val=nll_loss_2_nc.data[0], step=step)
+                           val=nll_loss_2_nc.data.item(), step=step)
                 logger.log(key="Loss Agent 2 (NLL COM)",
-                           val=nll_loss_2_com.data[0], step=step)
+                           val=nll_loss_2_com.data.item(), step=step)
                 if FLAGS.use_binary:
                     logger.log(key="Loss Agent 2 (RL)",
-                               val=loss_binary_2.data[0], step=step)
+                               val=loss_binary_2.data.item(), step=step)
                     logger.log(key="Loss Agent 2 (BAS)",
-                               val=loss_baseline_2.data[0], step=step)
+                               val=loss_baseline_2.data.item(), step=step)
                     if not FLAGS.fixed_exchange:
                         # TODO
                         pass

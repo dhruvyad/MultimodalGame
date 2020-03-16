@@ -12,7 +12,7 @@ from nltk.corpus import stopwords
 import string
 import itertools
 import logging
-
+import stat
 try:
     from visdom import Visdom
 except:
@@ -206,22 +206,26 @@ class FileLogger(object):
         self.min_file_level = min_file_level
 
     def Log(self, message, level=INFO):
+        import os
         if level >= self.min_print_level:
             # Write to STDERR
             sys.stderr.write("[%i] %s\n" % (level, message))
         if self.log_path and level >= self.min_file_level:
+            # os.chmod(self.log_path, 0o777)
             # Write to the log file then close it
             with open(self.log_path, 'a') as f:
                 datetime_string = datetime.datetime.now().strftime(
                     "%y-%m-%d %H:%M:%S")
                 f.write("%s [%i] %s\n" % (datetime_string, level, message))
-
+            # os.chmod(self.log_path, 0o777)
     def LogJSON(self, message_obj, level=INFO):
         if self.json_log_path and level >= self.min_file_level:
             with open(self.json_log_path, 'w') as f:
                 print >>f, json.dumps(message_obj)
         else:
             sys.stderr.write('WARNING: No JSON log filename.')
+
+
 
 
 def read_log_load(filename, last=True):
@@ -443,13 +447,15 @@ def xavier_normal(tensor, gain=1):
         >>> w = torch.Tensor(3, 5)
         >>> nninit.xavier_normal(w, gain=np.sqrt(2.0))
     """
-    if isinstance(tensor, Variable):
-        xavier_normal(tensor.data, gain=gain)
-        return tensor
-    else:
-        fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)
-        std = gain * np.sqrt(2.0 / (fan_in + fan_out))
-        return tensor.normal_(0, std)
+    #import sys
+    #sys.setrecursionlimit(10**6)
+    #if isinstance(tensor, Variable):
+    #    xavier_normal(tensor.data, gain=gain)
+    #    return tensor
+    #else:
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)
+    std = gain * np.sqrt(2.0 / (fan_in + fan_out))
+    return tensor.normal_(0, std)
 
 
 def build_mask(region_str, size):

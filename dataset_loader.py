@@ -330,8 +330,18 @@ def load_shapeworld_dataset(data_path, embed_path, mode, size, ds_type, name, ba
             # Random mask
             for i_m in range(bs):
                 mask[i_m] = generate_mask(batch['images'][i_m])
+                # mask[i_m] = batch['images'][i_m]
         batch['masked_im_1'] = torch.mul(mask, batch['images']) + (1 - mask)
-        batch['masked_im_2'] = torch.mul(1 - mask, batch['images']) + mask
+        batch['masked_im_2'] =  torch.mul(1 - mask, batch['images']) + mask
+
+        # similarity evaluation
+        # batch['masked_im_1'] = batch['images'] # torch.mul(mask, batch['images']) + (1 - mask)
+        # batch['masked_im_2'] = batch['images'] # torch.mul(1 - mask, batch['images']) + mask
+
+        # save_image(batch['images'],  './ims_orig.png', pad_value=0.5)
+        # save_image(batch['masked_im_1'],  './ims_1.png', pad_value=0.5)
+        # save_image(batch['masked_im_2'], './ims_2.png', pad_value=0.5)
+        # exit()
 
         if i == 0:
             # Save example batch
