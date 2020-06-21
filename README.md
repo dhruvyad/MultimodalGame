@@ -23,10 +23,10 @@ This is a framework for studying multi-agent emergent communication.
 Note: this assumes you are using the Anaconda package and environment manager. To install Anaconda see [here](https://conda.io/docs/user-guide/install/index.html).
 
 ```bash
-git clone --recurse-submodules https://github.com/lgraesser/MultimodalGame.git
+git clone --recurse-submodules https://github.com/dhruvyad/MultimodalGame.git
 cd MultimodalGame
 # Install dependencies
-conda create --name emergent_comms
+conda create --name emergent_comms python=3.6
 source activate emergent_comms
 conda install pytorch torchvision -c pytorch
 pip install -r requirements.txt
